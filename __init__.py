@@ -14,6 +14,7 @@ class MainDialog(QDialog):
     def __init__(self, parent=None):
         QDialog.__init__(self, parent)
         self.username, self.password = self.get_user()
+        self.saved_username = self.username
         self.initUI()
 
     def initUI(self):
@@ -58,13 +59,25 @@ class MainDialog(QDialog):
         return groupBox
 
     def get_user(self):
-        with open(user_file_json, 'r') as f:
-            data = json.load(f)
-        return data['username'], data['password']
+        if os.path.exists(user_file_json):
+            with open(user_file_json, 'r') as f:
+                data = json.load(f)
+            return data['username'], data['password']
+        else:
+            return '', ''
+
+    def update_user(self):
+        user = {
+            'username': self.username,
+            'password': self.password
+        }
+        with open(user_file_json, 'w') as f:
+            json.dump(user, f, indent=4)
 
     def login(self):
+        if (self.username != self.saved_username or self.password != self.saved_password):
+            self.update_user()
         anki_cloud = AnkiCloud(self.username, self.password)
-        # result = anki_cloud.login()
         tsv = anki_cloud.get_tsv_files()
         # QMessageBox.question(self, "result", ', '.join(tsv), QMessageBox.Yes | 
         # QMessageBox.No, QMessageBox.No)

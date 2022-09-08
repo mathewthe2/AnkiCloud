@@ -7,13 +7,7 @@ ANKI_CLOUD_FOLDER = 'AnkiCloud'
 
 class AnkiCloud():
     def __init__(self, username, password):
-        # self.username, self.password = self.get_user()
         self.api = PyiCloudService(username, password)
-
-    # def get_user(self):
-    #     with open(user_file_json, 'r') as f:
-    #         data = json.load(f)
-    #     return data['username'], data['password']
 
     def login(self):
         if self.api.requires_2fa:
@@ -21,8 +15,6 @@ class AnkiCloud():
             code = input("Enter the code you received of one of your approved devices: ")
             result = self.api.validate_2fa_code(code)
             print("Code validation result: %s" % result)
-
-            return result
 
             if not result:
                 print("Failed to verify security code")
@@ -58,7 +50,7 @@ class AnkiCloud():
                 print("Failed to verify verification code")
                 sys.exit(1)
 
-            return True
+        return True
 
     def get_folders(self):             
         return ''.join(self.api.drive.dir())
