@@ -1,5 +1,6 @@
 import os, sys
 import json
+from aqt.qt import *
 from .pyicloud import PyiCloudService
 from shutil import copyfileobj
 
@@ -8,25 +9,28 @@ ANKI_CLOUD_FOLDER = 'AnkiCloud'
 class AnkiCloud():
     def __init__(self, username, password):
         self.api = PyiCloudService(username, password)
+        self.is_logged_in = self.login()
 
     def login(self):
         if self.api.requires_2fa:
-            print("Two-factor authentication required.")
-            code = input("Enter the code you received of one of your approved devices: ")
-            result = self.api.validate_2fa_code(code)
-            print("Code validation result: %s" % result)
-
-            if not result:
-                print("Failed to verify security code")
-                sys.exit(1)
-
-            if not self.api.is_trusted_session:
-                print("Session is not trusted. Requesting trust...")
-                result = self.api.trust_session()
-                print("Session trust result %s" % result)
+            # print("Two-factor authentication required.")
+            # code = input("Enter the code you received of one of your approved devices: ")
+            code, pressed = QInputDialog.getText(None,"Two-factor authentication required.","Enter the code you received of one of your approved devices:",QLineEdit.Normal,"")
+            if pressed:
+                result = self.api.validate_2fa_code(code)
+                print("Code validation result: %s" % result)
 
                 if not result:
-                    print("Failed to request trust. You will likely be prompted for the code again in the coming weeks")
+                    print("Failed to verify security code")
+                    return False
+
+                if not self.api.is_trusted_session:
+                    print("Session is not trusted. Requesting trust...")
+                    result = self.api.trust_session()
+                    print("Session trust result %s" % result)
+
+                    if not result:
+                        print("Failed to request trust. You will likely be prompted for the code again in the coming weeks")
         elif self.api.requires_2sa:
             # TODO: use dialog UI
             import click
@@ -43,12 +47,12 @@ class AnkiCloud():
             device = devices[device]
             if not self.api.send_verification_code(device):
                 print("Failed to send verification code")
-                sys.exit(1)
+                return False
 
             code = click.prompt('Please enter validation code')
             if not self.api.validate_verification_code(device, code):
                 print("Failed to verify verification code")
-                sys.exit(1)
+                return False
 
         return True
 

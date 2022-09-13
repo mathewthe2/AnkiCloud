@@ -9,6 +9,7 @@ from os import path, mkdir
 from re import match
 import http.cookiejar as cookielib
 import getpass
+from aqt.qt import *
 
 from .exceptions import (
     PyiCloudFailedLoginException,
@@ -29,7 +30,7 @@ from .services import (
 from .utils import get_password_from_keyring
 
 
-LOGGER = logging.getLogger(__name__)
+LOGGER = logging.getLogger('base')
 
 HEADER_DATA = {
     "X-Apple-ID-Account-Country": "account_country",
@@ -67,7 +68,7 @@ class PyiCloudSession(Session):
         # Charge logging to the right service endpoint
         callee = inspect.stack()[2]
         module = inspect.getmodule(callee[0])
-        request_logger = logging.getLogger(module.__name__).getChild("http")
+        request_logger = logging.getLogger('base').getChild("http")
         if self.service.password_filter not in request_logger.filters:
             request_logger.addFilter(self.service.password_filter)
 
@@ -498,7 +499,8 @@ class PyiCloudService:
         except PyiCloudAPIResponseException as error:
             if error.code == -21669:
                 # Wrong verification code
-                LOGGER.error("Code verification failed.")
+                # LOGGER.error("Code verification failed.")
+                QMessageBox.warning(None, "Warning", "Code verification failed.", QMessageBox.Yes)
                 return False
             raise
 

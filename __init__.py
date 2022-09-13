@@ -75,16 +75,23 @@ class MainDialog(QDialog):
             json.dump(user, f, indent=4)
 
     def login(self):
-        if (self.username != self.saved_username or self.password != self.saved_password):
+        # text,pressed = QInputDialog.getText(self,"Two-factor authentication required.","Enter the code you received of one of your approved devices:",QLineEdit.Normal,"")
+        # if pressed:
+        #     label.setText(text)
+        #     label.adjustSize()
+        # return 
+        if (self.username != self.saved_username):
             self.update_user()
         anki_cloud = AnkiCloud(self.username, self.password)
-        tsv = anki_cloud.get_tsv_files()
+        if anki_cloud.is_logged_in:
+            syncDialog = SyncDialog(mw, anki_cloud)
+            syncDialog.exec_()
         # QMessageBox.question(self, "result", ', '.join(tsv), QMessageBox.Yes | 
         # QMessageBox.No, QMessageBox.No)
 
         # QDialog.done(self, 1)
-        syncDialog = SyncDialog(mw, anki_cloud)
-        syncDialog.exec_()
+        # syncDialog = SyncDialog(mw, anki_cloud)
+        # syncDialog.exec_()
 
 def showApp():
     mainDialog = MainDialog(mw)
