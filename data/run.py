@@ -7,7 +7,8 @@ sqlite3.dbapi2.converters['DATETIME'] = sqlite3.dbapi2.converters['TIMESTAMP']
 con = sqlite3.connect("data.db")
 # con = sqlite3.connect(":memory:")
 cur = con.cursor()
-cur.execute("CREATE TABLE cards(updated, added, deckName, modelName, fields, media, tags, options)")
+cur.execute("DROP TABLE IF EXISTS note;")
+cur.execute("CREATE TABLE note(updated, added, deckName, modelName, fields, media, tags, options)")
 
 data =[
     [
@@ -16,16 +17,16 @@ data =[
         "Japanese",   # deck
         "Japanese Anime", # model
         json.dumps({
-            'Word': '挑発',
-            'Kana': 'ちょうはつ',
-            'Meaning': 'provocation',
-            'Sentence': '乗るつもりか　敵の挑発に',
-            'Sentence Translation': 'Do you plan on accepting the enemy\'s challenge?'
+            'Word': '寝かす',
+            'Kana': 'ねかす',
+            'Meaning': 'to put to sleep',
+            'Sentence': '泣く赤ちゃん寝かす よい方法とは',
+            'Sentence Translation': 'Good ways to put an infant to sleep'
          }), 
         json.dumps({
             "audio": [{
-                "url": "https://assets.languagepod101.com/dictionary/japanese/audiomp3.php?kanji=挑発&kana=ちょうはつ",
-                "filename": "yomichan_ちょうはつ_挑発.mp3",
+                "url": "https://assets.languagepod101.com/dictionary/japanese/audiomp3.php?kanji=寝かす&kana=ねかす",
+                "filename": "yomichan_ねかす_寝かす.mp3",
                 "fields": [
                     "Picture"
                 ]
@@ -40,7 +41,9 @@ data =[
             }]
         }),
         json.dumps([]), # tags
-        json.dumps([]) # options
+        json.dumps({
+            "allowDuplicate": True
+        }) # options
     ],
     [
         "2022-01-03 23:45:00",  # last updated
@@ -48,18 +51,20 @@ data =[
         'Japanese', # deck
         'Japanese Anime', # model
         json.dumps({ 
-            'Word': '一刀両断',
-            'Kana': 'いっとうりょうだん',
-            'Meaning': 'cutting in two, taking decisive action'
+            'Word': '共演',
+            'Kana': 'きょうえん',
+            'Meaning': 'co-starring'
         }), 
         json.dumps({}), # media
         json.dumps([]), # tags
-        json.dumps([]) # options
+        json.dumps({
+                "allowDuplicate": True
+            }) # options
     ],
 ]
-cur.executemany("INSERT INTO cards VALUES (?,?,?,?,?,?,?,?)", data)
+cur.executemany("INSERT INTO note VALUES (?,?,?,?,?,?,?,?)", data)
 
 con.commit()
 
-for row in cur.execute("SELECT deckName, fields, tags FROM cards ORDER BY updated"):
+for row in cur.execute("SELECT deckName, fields, tags FROM note ORDER BY updated"):
     print(row)
